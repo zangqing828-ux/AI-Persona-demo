@@ -89,9 +89,12 @@ export default function Home() {
       {/* Header */}
       <header className="h-16 border-b bg-card flex items-center px-6 sticky top-0 z-50">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center">
-            <Sparkles className="w-5 h-5 text-primary-foreground" />
-          </div>
+          <img 
+            src="/images/marketingforce-logo.png" 
+            alt="Marketingforce" 
+            className="h-8 object-contain"
+          />
+          <div className="h-6 w-px bg-border" />
           <div>
             <h1 className="text-lg font-semibold text-foreground">AI 消费者模拟</h1>
             <p className="text-xs text-muted-foreground">宠物食品品牌 · 人宠双视角洞察</p>
@@ -102,9 +105,6 @@ export default function Home() {
             <Cat className="w-4 h-4 text-muted-foreground" />
             <Dog className="w-4 h-4 text-muted-foreground" />
           </div>
-          <Badge variant="outline" className="text-xs">
-            POC Demo
-          </Badge>
         </div>
       </header>
 
