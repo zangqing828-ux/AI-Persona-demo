@@ -18,17 +18,19 @@ import {
   BarChart3,
   PieChart,
   ChevronRight,
-  Dog,
-  Cat,
 } from "lucide-react";
-import { simulationSteps } from "@/data/petFoodSimulation";
 import ConceptTestConfig from "@/components/ConceptTestConfig";
 import AudienceSelector from "@/components/AudienceSelector";
 import DualPersonaGenerator from "@/components/DualPersonaGenerator";
 import DualSimulation from "@/components/DualSimulation";
+import UserPersonaGenerator from "@/components/UserPersonaGenerator";
+import UserSimulation from "@/components/UserSimulation";
 import InteractionAnalysis from "@/components/InteractionAnalysis";
 import BatchInterview from "@/components/BatchInterview";
 import InsightDashboard from "@/components/InsightDashboard";
+import { IndustrySelector } from "@/components/IndustrySelector";
+import { useIndustryData } from "@/hooks/useIndustryData";
+import { useIndustryConfig } from "@/hooks/useIndustryConfig";
 
 const stepIcons: Record<string, React.ReactNode> = {
   Settings: <Settings className="w-4 h-4" />,
@@ -43,12 +45,20 @@ const stepIcons: Record<string, React.ReactNode> = {
 export default function Home() {
   const [currentStep, setCurrentStep] = useState(1);
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
+  const [currentIndustry, setCurrentIndustry] = useState(() => {
+    // Read from localStorage on mount
+    return localStorage.getItem('current-industry') || 'pet-food';
+  });
+
+  // Get industry config
+  const { industryConfig } = useIndustryConfig();
+  const { workflowSteps } = useIndustryData();
 
   const handleStepComplete = () => {
     if (!completedSteps.includes(currentStep)) {
       setCompletedSteps([...completedSteps, currentStep]);
     }
-    if (currentStep < simulationSteps.length) {
+    if (currentStep < workflowSteps.length) {
       setCurrentStep(currentStep + 1);
     }
   };
@@ -62,23 +72,45 @@ export default function Home() {
 
   const renderStepContent = () => {
     try {
-      switch (currentStep) {
-        case 1:
-          return <ConceptTestConfig onComplete={handleStepComplete} />;
-        case 2:
-          return <AudienceSelector onComplete={handleStepComplete} />;
-        case 3:
-          return <DualPersonaGenerator onComplete={handleStepComplete} />;
-        case 4:
-          return <DualSimulation onComplete={handleStepComplete} />;
-        case 5:
-          return <InteractionAnalysis onComplete={handleStepComplete} />;
-        case 6:
-          return <BatchInterview onComplete={handleStepComplete} />;
-        case 7:
-          return <InsightDashboard />;
-        default:
-          return null;
+      // Map workflow steps to components based on industry
+      if (currentIndustry === 'beauty') {
+        // Beauty industry workflow (6 steps)
+        switch (currentStep) {
+          case 1:
+            return <ConceptTestConfig onComplete={handleStepComplete} />;
+          case 2:
+            return <AudienceSelector onComplete={handleStepComplete} />;
+          case 3:
+            return <UserPersonaGenerator onComplete={handleStepComplete} />;
+          case 4:
+            return <UserSimulation onComplete={handleStepComplete} />;
+          case 5:
+            return <BatchInterview onComplete={handleStepComplete} />;
+          case 6:
+            return <InsightDashboard />;
+          default:
+            return null;
+        }
+      } else {
+        // Pet food industry workflow (7 steps)
+        switch (currentStep) {
+          case 1:
+            return <ConceptTestConfig onComplete={handleStepComplete} />;
+          case 2:
+            return <AudienceSelector onComplete={handleStepComplete} />;
+          case 3:
+            return <DualPersonaGenerator onComplete={handleStepComplete} />;
+          case 4:
+            return <DualSimulation onComplete={handleStepComplete} />;
+          case 5:
+            return <InteractionAnalysis onComplete={handleStepComplete} />;
+          case 6:
+            return <BatchInterview onComplete={handleStepComplete} />;
+          case 7:
+            return <InsightDashboard />;
+          default:
+            return null;
+        }
       }
     } catch (error) {
       return (
@@ -103,18 +135,21 @@ export default function Home() {
           <div className="h-6 w-px bg-border" />
           <div>
             <h1 className="text-lg font-semibold text-foreground">
-              AI 消费者模拟
+              AI {industryConfig?.name}消费者模拟
             </h1>
             <p className="text-xs text-muted-foreground">
-              宠物食品品牌 · 人宠双视角洞察
+              {industryConfig?.description}
             </p>
           </div>
         </div>
         <div className="ml-auto flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <Cat className="w-4 h-4 text-muted-foreground" />
-            <Dog className="w-4 h-4 text-muted-foreground" />
-          </div>
+          <IndustrySelector
+            currentIndustry={currentIndustry}
+            onIndustryChange={(industryId) => {
+              setCurrentIndustry(industryId);
+              window.location.reload();
+            }}
+          />
         </div>
       </header>
 
@@ -131,7 +166,7 @@ export default function Home() {
           </div>
 
           <nav className="flex-1 space-y-1">
-            {simulationSteps.map(step => {
+            {workflowSteps.map(step => {
               const isCompleted = completedSteps.includes(step.id);
               const isCurrent = currentStep === step.id;
               const isClickable = isCompleted || step.id <= currentStep;
@@ -204,14 +239,14 @@ export default function Home() {
             <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
               <span>完成进度</span>
               <span>
-                {completedSteps.length}/{simulationSteps.length}
+                {completedSteps.length}/{workflowSteps.length}
               </span>
             </div>
             <div className="h-2 bg-muted rounded-full overflow-hidden">
               <div
                 className="h-full bg-primary transition-all duration-300"
                 style={{
-                  width: `${(completedSteps.length / simulationSteps.length) * 100}%`,
+                  width: `${(completedSteps.length / workflowSteps.length) * 100}%`,
                 }}
               />
             </div>

@@ -1,6 +1,7 @@
 /**
  * 虚拟客群选择组件
  * 步骤2：从CDP选择或创建目标人群
+ * 支持多行业动态渲染
  */
 
 import { useState, useMemo, useCallback } from "react";
@@ -16,13 +17,10 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
 import { Users, Filter, Database, Tag, X } from "lucide-react";
+import { useIndustryConfig } from "@/hooks/useIndustryConfig";
 
-interface Props {
-  onComplete: () => void;
-}
-
-// CDP 标签数据
-const cdpTags = {
+// Pet food CDP tags
+const petFoodCDPTags = {
   feedingPhilosophy: [
     { id: "scientific", label: "科学养宠", count: 3200 },
     { id: "premium", label: "精细养", count: 1800 },
@@ -54,12 +52,37 @@ const cdpTags = {
   ],
 };
 
+// Beauty industry CDP tags
+import { beautyCDPTags as beautyCDPTagsData, beautyAdvancedFilters as beautyAdvancedFiltersData } from "@/data/beautySimulation";
+
+interface Props {
+  onComplete: () => void;
+}
+
 export default function AudienceSelector({ onComplete }: Props) {
-  const [selectedTags, setSelectedTags] = useState<string[]>([
-    "scientific",
-    "cat",
-    "sensitive_stomach",
-  ]);
+  const { industryId } = useIndustryConfig();
+
+  // Get industry-specific tags and filters
+  const currentCDPTags = useMemo(() => {
+    return industryId === 'beauty' ? beautyCDPTagsData : petFoodCDPTags;
+  }, [industryId]);
+
+  const currentAdvancedFilters = useMemo(() => {
+    return industryId === 'beauty' ? beautyAdvancedFiltersData : [
+      { id: 'newUser', label: '仅新用户（注册<30天）' },
+      { id: 'activeUser', label: '活跃用户（30天内有购买）' },
+      { id: 'multiPet', label: '多宠家庭' },
+    ];
+  }, [industryId]);
+
+  // Default selected tags based on industry
+  const defaultTags = useMemo(() => {
+    return industryId === 'beauty'
+      ? ['combination', 'acne', 'advanced']
+      : ['scientific', 'cat', 'sensitive_stomach'];
+  }, [industryId]);
+
+  const [selectedTags, setSelectedTags] = useState<string[]>(defaultTags);
   const [sampleSize, setSampleSize] = useState([5000]);
 
   const toggleTag = useCallback((tagId: string) => {
@@ -85,12 +108,282 @@ export default function AudienceSelector({ onComplete }: Props) {
   );
 
   const getTagLabel = useCallback((tagId: string) => {
-    for (const category of Object.values(cdpTags)) {
-      const tag = category.find(t => t.id === tagId);
+    for (const category of Object.values(currentCDPTags)) {
+      const tag = category.find((t: any) => t.id === tagId);
       if (tag) return tag.label;
     }
     return tagId;
-  }, []);
+  }, [currentCDPTags]);
+
+  // Render tag categories based on industry
+  const renderTagCategories = () => {
+    if (industryId === 'beauty') {
+      const beautyTags = currentCDPTags as any;
+      return (
+        <>
+          {/* Skin Type */}
+          <div>
+            <h4 className="text-sm font-medium text-foreground mb-3">
+              肤质类型
+            </h4>
+            <div className="flex flex-wrap gap-2">
+              {beautyTags.skinType.map((tag: any) => (
+                <button
+                  key={tag.id}
+                  onClick={() => toggleTag(tag.id)}
+                  className={`px-3 py-1.5 rounded-full text-sm border transition-all ${
+                    selectedTags.includes(tag.id)
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "bg-background hover:bg-muted border-border"
+                  }`}
+                >
+                  {tag.label}
+                  <span className="ml-1.5 text-xs opacity-70">
+                    {(tag.count / 1000).toFixed(1)}k
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Skin Concerns */}
+          <div>
+            <h4 className="text-sm font-medium text-foreground mb-3">
+              护肤困扰
+            </h4>
+            <div className="flex flex-wrap gap-2">
+              {beautyTags.concerns.map((tag: any) => (
+                <button
+                  key={tag.id}
+                  onClick={() => toggleTag(tag.id)}
+                  className={`px-3 py-1.5 rounded-full text-sm border transition-all ${
+                    selectedTags.includes(tag.id)
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "bg-background hover:bg-muted border-border"
+                  }`}
+                >
+                  {tag.label}
+                  <span className="ml-1.5 text-xs opacity-70">
+                    {(tag.count / 1000).toFixed(1)}k
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Beauty Routine */}
+          <div>
+            <h4 className="text-sm font-medium text-foreground mb-3">
+              护肤习惯
+            </h4>
+            <div className="flex flex-wrap gap-2">
+              {beautyTags.beautyRoutine.map((tag: any) => (
+                <button
+                  key={tag.id}
+                  onClick={() => toggleTag(tag.id)}
+                  className={`px-3 py-1.5 rounded-full text-sm border transition-all ${
+                    selectedTags.includes(tag.id)
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "bg-background hover:bg-muted border-border"
+                  }`}
+                >
+                  {tag.label}
+                  <span className="ml-1.5 text-xs opacity-70">
+                    {(tag.count / 1000).toFixed(1)}k
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Income Level */}
+          <div>
+            <h4 className="text-sm font-medium text-foreground mb-3">
+              收入水平
+            </h4>
+            <div className="flex flex-wrap gap-2">
+              {beautyTags.income.map((tag: any) => (
+                <button
+                  key={tag.id}
+                  onClick={() => toggleTag(tag.id)}
+                  className={`px-3 py-1.5 rounded-full text-sm border transition-all ${
+                    selectedTags.includes(tag.id)
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "bg-background hover:bg-muted border-border"
+                  }`}
+                >
+                  {tag.label}
+                  <span className="ml-1.5 text-xs opacity-70">
+                    {(tag.count / 1000).toFixed(1)}k
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Age Group */}
+          <div>
+            <h4 className="text-sm font-medium text-foreground mb-3">
+              年龄分布
+            </h4>
+            <div className="flex flex-wrap gap-2">
+              {beautyTags.ageGroup.map((tag: any) => (
+                <button
+                  key={tag.id}
+                  onClick={() => toggleTag(tag.id)}
+                  className={`px-3 py-1.5 rounded-full text-sm border transition-all ${
+                    selectedTags.includes(tag.id)
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "bg-background hover:bg-muted border-border"
+                  }`}
+                >
+                  {tag.label}
+                  <span className="ml-1.5 text-xs opacity-70">
+                    {(tag.count / 1000).toFixed(1)}k
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </>
+      );
+    }
+
+    // Pet food industry (original)
+    return (
+      <>
+        {/* Feeding Philosophy */}
+        <div>
+          <h4 className="text-sm font-medium text-foreground mb-3">
+            养宠理念
+          </h4>
+          <div className="flex flex-wrap gap-2">
+            {currentCDPTags.feedingPhilosophy.map((tag: any) => (
+              <button
+                key={tag.id}
+                onClick={() => toggleTag(tag.id)}
+                className={`px-3 py-1.5 rounded-full text-sm border transition-all ${
+                  selectedTags.includes(tag.id)
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "bg-background hover:bg-muted border-border"
+                }`}
+              >
+                {tag.label}
+                <span className="ml-1.5 text-xs opacity-70">
+                  {(tag.count / 1000).toFixed(1)}k
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Pet Type */}
+        <div>
+          <h4 className="text-sm font-medium text-foreground mb-3">
+            宠物类型
+          </h4>
+          <div className="flex flex-wrap gap-2">
+            {currentCDPTags.petType.map((tag: any) => (
+              <button
+                key={tag.id}
+                onClick={() => toggleTag(tag.id)}
+                className={`px-3 py-1.5 rounded-full text-sm border transition-all ${
+                  selectedTags.includes(tag.id)
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "bg-background hover:bg-muted border-border"
+                }`}
+              >
+                {tag.id === "cat" ? "🐱" : "🐕"} {tag.label}
+                <span className="ml-1.5 text-xs opacity-70">
+                  {(tag.count / 1000).toFixed(1)}k
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Health Concerns */}
+        <div>
+          <h4 className="text-sm font-medium text-foreground mb-3">
+            健康关注
+          </h4>
+          <div className="flex flex-wrap gap-2">
+            {currentCDPTags.healthConcern.map((tag: any) => (
+              <button
+                key={tag.id}
+                onClick={() => toggleTag(tag.id)}
+                className={`px-3 py-1.5 rounded-full text-sm border transition-all ${
+                  selectedTags.includes(tag.id)
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "bg-background hover:bg-muted border-border"
+                }`}
+              >
+                {tag.label}
+                <span className="ml-1.5 text-xs opacity-70">
+                  {(tag.count / 1000).toFixed(1)}k
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Price Range */}
+        <div>
+          <h4 className="text-sm font-medium text-foreground mb-3">
+            消费能力
+          </h4>
+          <div className="flex flex-wrap gap-2">
+            {currentCDPTags.priceRange.map((tag: any) => (
+              <button
+                key={tag.id}
+                onClick={() => toggleTag(tag.id)}
+                className={`px-3 py-1.5 rounded-full text-sm border transition-all ${
+                  selectedTags.includes(tag.id)
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "bg-background hover:bg-muted border-border"
+                }`}
+              >
+                {tag.label}
+                <span className="ml-1.5 text-xs opacity-70">
+                  {(tag.count / 1000).toFixed(1)}k
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Age Group */}
+        <div>
+          <h4 className="text-sm font-medium text-foreground mb-3">
+            年龄分布
+          </h4>
+          <div className="flex flex-wrap gap-2">
+            {currentCDPTags.ageGroup.map((tag: any) => (
+              <button
+                key={tag.id}
+                onClick={() => toggleTag(tag.id)}
+                className={`px-3 py-1.5 rounded-full text-sm border transition-all ${
+                  selectedTags.includes(tag.id)
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "bg-background hover:bg-muted border-border"
+                }`}
+              >
+                {tag.label}
+                <span className="ml-1.5 text-xs opacity-70">
+                  {(tag.count / 1000).toFixed(1)}k
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </>
+    );
+  };
+
+  // Get next step text based on industry
+  const getNextStepText = () => {
+    return industryId === 'beauty' ? '下一步：生成用户画像' : '下一步：生成人宠画像';
+  };
 
   return (
     <div className="space-y-6">
@@ -146,130 +439,7 @@ export default function AudienceSelector({ onComplete }: Props) {
               <CardDescription>拖拽或点击标签添加到测试人群</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              {/* Feeding Philosophy */}
-              <div>
-                <h4 className="text-sm font-medium text-foreground mb-3">
-                  养宠理念
-                </h4>
-                <div className="flex flex-wrap gap-2">
-                  {cdpTags.feedingPhilosophy.map(tag => (
-                    <button
-                      key={tag.id}
-                      onClick={() => toggleTag(tag.id)}
-                      className={`px-3 py-1.5 rounded-full text-sm border transition-all ${
-                        selectedTags.includes(tag.id)
-                          ? "bg-primary text-primary-foreground border-primary"
-                          : "bg-background hover:bg-muted border-border"
-                      }`}
-                    >
-                      {tag.label}
-                      <span className="ml-1.5 text-xs opacity-70">
-                        {(tag.count / 1000).toFixed(1)}k
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Pet Type */}
-              <div>
-                <h4 className="text-sm font-medium text-foreground mb-3">
-                  宠物类型
-                </h4>
-                <div className="flex flex-wrap gap-2">
-                  {cdpTags.petType.map(tag => (
-                    <button
-                      key={tag.id}
-                      onClick={() => toggleTag(tag.id)}
-                      className={`px-3 py-1.5 rounded-full text-sm border transition-all ${
-                        selectedTags.includes(tag.id)
-                          ? "bg-primary text-primary-foreground border-primary"
-                          : "bg-background hover:bg-muted border-border"
-                      }`}
-                    >
-                      {tag.id === "cat" ? "🐱" : "🐕"} {tag.label}
-                      <span className="ml-1.5 text-xs opacity-70">
-                        {(tag.count / 1000).toFixed(1)}k
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Health Concerns */}
-              <div>
-                <h4 className="text-sm font-medium text-foreground mb-3">
-                  健康关注
-                </h4>
-                <div className="flex flex-wrap gap-2">
-                  {cdpTags.healthConcern.map(tag => (
-                    <button
-                      key={tag.id}
-                      onClick={() => toggleTag(tag.id)}
-                      className={`px-3 py-1.5 rounded-full text-sm border transition-all ${
-                        selectedTags.includes(tag.id)
-                          ? "bg-primary text-primary-foreground border-primary"
-                          : "bg-background hover:bg-muted border-border"
-                      }`}
-                    >
-                      {tag.label}
-                      <span className="ml-1.5 text-xs opacity-70">
-                        {(tag.count / 1000).toFixed(1)}k
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Price Range */}
-              <div>
-                <h4 className="text-sm font-medium text-foreground mb-3">
-                  消费能力
-                </h4>
-                <div className="flex flex-wrap gap-2">
-                  {cdpTags.priceRange.map(tag => (
-                    <button
-                      key={tag.id}
-                      onClick={() => toggleTag(tag.id)}
-                      className={`px-3 py-1.5 rounded-full text-sm border transition-all ${
-                        selectedTags.includes(tag.id)
-                          ? "bg-primary text-primary-foreground border-primary"
-                          : "bg-background hover:bg-muted border-border"
-                      }`}
-                    >
-                      {tag.label}
-                      <span className="ml-1.5 text-xs opacity-70">
-                        {(tag.count / 1000).toFixed(1)}k
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Age Group */}
-              <div>
-                <h4 className="text-sm font-medium text-foreground mb-3">
-                  年龄分布
-                </h4>
-                <div className="flex flex-wrap gap-2">
-                  {cdpTags.ageGroup.map(tag => (
-                    <button
-                      key={tag.id}
-                      onClick={() => toggleTag(tag.id)}
-                      className={`px-3 py-1.5 rounded-full text-sm border transition-all ${
-                        selectedTags.includes(tag.id)
-                          ? "bg-primary text-primary-foreground border-primary"
-                          : "bg-background hover:bg-muted border-border"
-                      }`}
-                    >
-                      {tag.label}
-                      <span className="ml-1.5 text-xs opacity-70">
-                        {(tag.count / 1000).toFixed(1)}k
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </div>
+              {renderTagCategories()}
             </CardContent>
           </Card>
         </div>
@@ -340,24 +510,14 @@ export default function AudienceSelector({ onComplete }: Props) {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                <div className="flex items-center space-x-2">
-                  <Checkbox id="newUser" />
-                  <label htmlFor="newUser" className="text-sm">
-                    仅新用户（注册&lt;30天）
-                  </label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox id="activeUser" defaultChecked />
-                  <label htmlFor="activeUser" className="text-sm">
-                    活跃用户（30天内有购买）
-                  </label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox id="multiPet" />
-                  <label htmlFor="multiPet" className="text-sm">
-                    多宠家庭
-                  </label>
-                </div>
+                {currentAdvancedFilters.map((filter: any) => (
+                  <div key={filter.id} className="flex items-center space-x-2">
+                    <Checkbox id={filter.id} />
+                    <label htmlFor={filter.id} className="text-sm">
+                      {filter.label}
+                    </label>
+                  </div>
+                ))}
               </div>
             </CardContent>
           </Card>
@@ -368,7 +528,7 @@ export default function AudienceSelector({ onComplete }: Props) {
             disabled={selectedTags.length === 0}
             onClick={onComplete}
           >
-            下一步：生成人宠画像
+            {getNextStepText()}
           </Button>
         </div>
       </div>

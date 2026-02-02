@@ -25,20 +25,21 @@ import {
   Scale,
   Leaf,
 } from "lucide-react";
-import { testProducts } from "@/data/petFoodSimulation";
+import { useIndustryData } from "@/hooks/useIndustryData";
 
 interface Props {
   onComplete: () => void;
 }
 
 export default function ConceptTestConfig({ onComplete }: Props) {
+  const { products, currentIndustry } = useIndustryData();
   const [selectedProduct, setSelectedProduct] = useState<string | null>(null);
 
   const handleProductSelect = (productId: string) => {
     setSelectedProduct(productId);
   };
 
-  const selectedProductData = testProducts.find(p => p.id === selectedProduct);
+  const selectedProductData = products.find(p => p.id === selectedProduct);
 
   return (
     <div className="space-y-6">
@@ -68,7 +69,7 @@ export default function ConceptTestConfig({ onComplete }: Props) {
                 role="radiogroup"
                 aria-label="选择测试产品"
               >
-                {testProducts.map(product => (
+                {products.map(product => (
                   <div
                     key={product.id}
                     onClick={() => handleProductSelect(product.id)}
@@ -94,18 +95,29 @@ export default function ConceptTestConfig({ onComplete }: Props) {
                           <h3 className="font-medium text-foreground">
                             {product.name}
                           </h3>
-                          <Badge variant="secondary" className="text-xs">
-                            {product.targetPet === "猫" ? "🐱 猫粮" : "🐕 狗粮"}
-                          </Badge>
+                          {currentIndustry === 'pet-food' && 'targetPet' in product && (
+                            <Badge variant="secondary" className="text-xs">
+                              {(product as any).targetPet === "猫" ? "🐱 猫粮" : "🐕 狗粮"}
+                            </Badge>
+                          )}
                         </div>
                         <p className="text-sm text-muted-foreground mb-3">
-                          {product.brand} · {product.category} ·{" "}
-                          {product.weight}
+                          {(product as any).brand} · {(product as any).category} ·{" "}
+                          {currentIndustry === 'pet-food' && 'weight' in product
+                            ? (product as any).weight
+                            : currentIndustry === 'beauty' && 'size' in product
+                            ? (product as any).size
+                            : ''}
                         </p>
                         <div className="flex flex-wrap gap-2">
-                          {product.sellingPoints
+                          {(currentIndustry === 'pet-food' && 'sellingPoints' in product
+                            ? (product as any).sellingPoints
+                            : currentIndustry === 'beauty' && 'benefits' in product
+                            ? (product as any).benefits
+                            : []
+                          )
                             .slice(0, 3)
-                            .map((point, idx) => (
+                            .map((point: string, idx: number) => (
                               <Badge
                                 key={idx}
                                 variant="outline"
@@ -118,14 +130,18 @@ export default function ConceptTestConfig({ onComplete }: Props) {
                       </div>
                       <div className="text-right">
                         <p className="text-lg font-semibold text-primary">
-                          ¥{product.price}
+                          ¥{(product as any).price}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          {product.weight}
+                          {currentIndustry === 'pet-food' && 'weight' in product
+                            ? (product as any).weight
+                            : currentIndustry === 'beauty' && 'size' in product
+                            ? (product as any).size
+                            : ''}
                         </p>
                       </div>
                     </div>
-                    {selectedProduct === product.id && (
+                    {selectedProduct === product.id && currentIndustry === 'pet-food' && 'proteinContent' in product && (
                       <div className="mt-4 pt-4 border-t">
                         <div className="grid grid-cols-3 gap-4 text-center">
                           <div className="p-2 bg-muted/50 rounded-lg">
@@ -134,7 +150,7 @@ export default function ConceptTestConfig({ onComplete }: Props) {
                               蛋白质
                             </div>
                             <p className="font-semibold text-foreground">
-                              {product.proteinContent}%
+                              {(product as any).proteinContent}%
                             </p>
                           </div>
                           <div className="p-2 bg-muted/50 rounded-lg">
@@ -143,7 +159,7 @@ export default function ConceptTestConfig({ onComplete }: Props) {
                               脂肪
                             </div>
                             <p className="font-semibold text-foreground">
-                              {product.fatContent}%
+                              {(product as any).fatContent}%
                             </p>
                           </div>
                           <div className="p-2 bg-muted/50 rounded-lg">
@@ -152,9 +168,21 @@ export default function ConceptTestConfig({ onComplete }: Props) {
                               碳水
                             </div>
                             <p className="font-semibold text-foreground">
-                              {product.carbContent}%
+                              {(product as any).carbContent}%
                             </p>
                           </div>
+                        </div>
+                      </div>
+                    )}
+                    {selectedProduct === product.id && currentIndustry === 'beauty' && 'mainIngredients' in product && (
+                      <div className="mt-4 pt-4 border-t">
+                        <div className="text-xs text-muted-foreground mb-2">主要成分</div>
+                        <div className="flex flex-wrap gap-2">
+                          {(product as any).mainIngredients.map((ing: string, idx: number) => (
+                            <Badge key={idx} variant="outline" className="text-xs">
+                              {ing}
+                            </Badge>
+                          ))}
                         </div>
                       </div>
                     )}
@@ -186,50 +214,56 @@ export default function ConceptTestConfig({ onComplete }: Props) {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div>
-                    <Label className="text-xs text-muted-foreground">
-                      主要原料
-                    </Label>
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      {selectedProductData.mainIngredients.map((ing, idx) => (
-                        <Badge
-                          key={idx}
-                          variant="secondary"
-                          className="text-xs"
-                        >
-                          {ing}
-                        </Badge>
-                      ))}
+                  {'mainIngredients' in selectedProductData && (
+                    <div>
+                      <Label className="text-xs text-muted-foreground">
+                        {currentIndustry === 'pet-food' ? '主要原料' : '主要成分'}
+                      </Label>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {(selectedProductData as any).mainIngredients.map((ing: string, idx: number) => (
+                          <Badge
+                            key={idx}
+                            variant="secondary"
+                            className="text-xs"
+                          >
+                            {ing}
+                          </Badge>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                  <div>
-                    <Label className="text-xs text-muted-foreground">
-                      功能添加
-                    </Label>
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      {selectedProductData.additives.map((add, idx) => (
-                        <Badge key={idx} variant="outline" className="text-xs">
-                          {add}
-                        </Badge>
-                      ))}
+                  )}
+                  {currentIndustry === 'pet-food' && 'additives' in selectedProductData && (
+                    <div>
+                      <Label className="text-xs text-muted-foreground">
+                        功能添加
+                      </Label>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {(selectedProductData as any).additives.map((add: string, idx: number) => (
+                          <Badge key={idx} variant="outline" className="text-xs">
+                            {add}
+                          </Badge>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                  <div>
-                    <Label className="text-xs text-muted-foreground">
-                      认证资质
-                    </Label>
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      {selectedProductData.certifications.map((cert, idx) => (
-                        <Badge
-                          key={idx}
-                          className="text-xs bg-green-500/10 text-green-600 border-green-500/20"
-                        >
-                          <CheckCircle2 className="w-3 h-3 mr-1" />
-                          {cert}
-                        </Badge>
-                      ))}
+                  )}
+                  {'certifications' in selectedProductData && (
+                    <div>
+                      <Label className="text-xs text-muted-foreground">
+                        认证资质
+                      </Label>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {(selectedProductData as any).certifications.map((cert: string, idx: number) => (
+                          <Badge
+                            key={idx}
+                            className="text-xs bg-green-500/10 text-green-600 border-green-500/20"
+                          >
+                            <CheckCircle2 className="w-3 h-3 mr-1" />
+                            {cert}
+                          </Badge>
+                        ))}
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </CardContent>
               </Card>
 
