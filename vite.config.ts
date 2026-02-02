@@ -18,6 +18,12 @@ const TRIM_TARGET_BYTES = Math.floor(MAX_LOG_SIZE_BYTES * 0.6); // Trim to 60% t
 
 type LogSource = "browserConsole" | "networkRequests" | "sessionReplay";
 
+interface DebugPayload {
+  consoleLogs?: unknown[];
+  networkRequests?: unknown[];
+  sessionEvents?: unknown[];
+}
+
 function ensureLogDir() {
   if (!fs.existsSync(LOG_DIR)) {
     fs.mkdirSync(LOG_DIR, { recursive: true });
@@ -56,7 +62,7 @@ function writeToLogFile(source: LogSource, entries: unknown[]) {
   const logPath = path.join(LOG_DIR, `${source}.log`);
 
   // Format entries with timestamps
-  const lines = entries.map((entry) => {
+  const lines = entries.map(entry => {
     const ts = new Date().toISOString();
     return `[${ts}] ${JSON.stringify(entry)}`;
   });
@@ -104,7 +110,7 @@ function vitePluginManusDebugCollector(): Plugin {
           return next();
         }
 
-        const handlePayload = (payload: any) => {
+        const handlePayload = (payload: DebugPayload) => {
           // Write logs directly to files
           if (payload.consoleLogs?.length > 0) {
             writeToLogFile("browserConsole", payload.consoleLogs);
@@ -132,7 +138,7 @@ function vitePluginManusDebugCollector(): Plugin {
         }
 
         let body = "";
-        req.on("data", (chunk) => {
+        req.on("data", chunk => {
           body += chunk.toString();
         });
 
@@ -150,7 +156,13 @@ function vitePluginManusDebugCollector(): Plugin {
   };
 }
 
-const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime(), vitePluginManusDebugCollector()];
+const plugins = [
+  react(),
+  tailwindcss(),
+  jsxLocPlugin(),
+  vitePluginManusRuntime(),
+  vitePluginManusDebugCollector(),
+];
 
 export default defineConfig({
   plugins,

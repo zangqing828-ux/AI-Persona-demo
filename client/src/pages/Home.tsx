@@ -1,7 +1,7 @@
 /**
  * AI 消费者模拟 - 宠物食品品牌
  * 主页面组件
- * 
+ *
  * 设计风格：智能中台美学
  * - 左侧步骤导航
  * - 中央工作区
@@ -9,20 +9,17 @@
  */
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { 
-  Settings, 
-  Users, 
-  UserCircle, 
-  Brain, 
-  LineChart, 
-  BarChart3, 
+import {
+  Settings,
+  Users,
+  UserCircle,
+  Brain,
+  LineChart,
+  BarChart3,
   PieChart,
   ChevronRight,
-  Sparkles,
   Dog,
-  Cat
+  Cat,
 } from "lucide-react";
 import { simulationSteps } from "@/data/petFoodSimulation";
 import ConceptTestConfig from "@/components/ConceptTestConfig";
@@ -40,7 +37,7 @@ const stepIcons: Record<string, React.ReactNode> = {
   Brain: <Brain className="w-4 h-4" />,
   LineChart: <LineChart className="w-4 h-4" />,
   BarChart: <BarChart3 className="w-4 h-4" />,
-  PieChart: <PieChart className="w-4 h-4" />
+  PieChart: <PieChart className="w-4 h-4" />,
 };
 
 export default function Home() {
@@ -64,23 +61,32 @@ export default function Home() {
   };
 
   const renderStepContent = () => {
-    switch (currentStep) {
-      case 1:
-        return <ConceptTestConfig onComplete={handleStepComplete} />;
-      case 2:
-        return <AudienceSelector onComplete={handleStepComplete} />;
-      case 3:
-        return <DualPersonaGenerator onComplete={handleStepComplete} />;
-      case 4:
-        return <DualSimulation onComplete={handleStepComplete} />;
-      case 5:
-        return <InteractionAnalysis onComplete={handleStepComplete} />;
-      case 6:
-        return <BatchInterview onComplete={handleStepComplete} />;
-      case 7:
-        return <InsightDashboard />;
-      default:
-        return null;
+    try {
+      switch (currentStep) {
+        case 1:
+          return <ConceptTestConfig onComplete={handleStepComplete} />;
+        case 2:
+          return <AudienceSelector onComplete={handleStepComplete} />;
+        case 3:
+          return <DualPersonaGenerator onComplete={handleStepComplete} />;
+        case 4:
+          return <DualSimulation onComplete={handleStepComplete} />;
+        case 5:
+          return <InteractionAnalysis onComplete={handleStepComplete} />;
+        case 6:
+          return <BatchInterview onComplete={handleStepComplete} />;
+        case 7:
+          return <InsightDashboard />;
+        default:
+          return null;
+      }
+    } catch (error) {
+      return (
+        <div className="p-8 text-center">
+          <p className="text-destructive">加载步骤内容时出错</p>
+          <p className="text-muted-foreground text-sm mt-2">请刷新页面重试</p>
+        </div>
+      );
     }
   };
 
@@ -89,15 +95,19 @@ export default function Home() {
       {/* Header */}
       <header className="h-16 border-b bg-card flex items-center px-6 sticky top-0 z-50">
         <div className="flex items-center gap-3">
-          <img 
-            src="/images/marketingforce-logo.png" 
-            alt="Marketingforce" 
+          <img
+            src="/images/marketingforce-logo.png"
+            alt="Marketingforce"
             className="h-8 object-contain"
           />
           <div className="h-6 w-px bg-border" />
           <div>
-            <h1 className="text-lg font-semibold text-foreground">AI 消费者模拟</h1>
-            <p className="text-xs text-muted-foreground">宠物食品品牌 · 人宠双视角洞察</p>
+            <h1 className="text-lg font-semibold text-foreground">
+              AI 消费者模拟
+            </h1>
+            <p className="text-xs text-muted-foreground">
+              宠物食品品牌 · 人宠双视角洞察
+            </p>
           </div>
         </div>
         <div className="ml-auto flex items-center gap-4">
@@ -112,12 +122,16 @@ export default function Home() {
         {/* Left Sidebar - Step Navigation */}
         <aside className="w-72 border-r bg-card p-4 flex flex-col">
           <div className="mb-6">
-            <h2 className="text-sm font-medium text-foreground mb-1">模拟流程</h2>
-            <p className="text-xs text-muted-foreground">完成以下步骤获取洞察</p>
+            <h2 className="text-sm font-medium text-foreground mb-1">
+              模拟流程
+            </h2>
+            <p className="text-xs text-muted-foreground">
+              完成以下步骤获取洞察
+            </p>
           </div>
 
           <nav className="flex-1 space-y-1">
-            {simulationSteps.map((step, index) => {
+            {simulationSteps.map(step => {
               const isCompleted = completedSteps.includes(step.id);
               const isCurrent = currentStep === step.id;
               const isClickable = isCompleted || step.id <= currentStep;
@@ -127,33 +141,50 @@ export default function Home() {
                   key={step.id}
                   onClick={() => handleStepClick(step.id)}
                   disabled={!isClickable}
+                  role="menuitem"
+                  aria-current={isCurrent ? "step" : undefined}
+                  aria-label={`${step.name} ${isCompleted ? "已完成" : isCurrent ? "当前步骤" : ""}`}
+                  aria-disabled={!isClickable}
+                  tabIndex={isClickable ? 0 : -1}
                   className={`w-full flex items-start gap-3 p-3 rounded-lg text-left transition-all duration-200 ${
                     isCurrent
-                      ? 'bg-primary/10 border border-primary/20'
+                      ? "bg-primary/10 border border-primary/20"
                       : isCompleted
-                      ? 'bg-muted/50 hover:bg-muted'
-                      : 'hover:bg-muted/30 opacity-50'
-                  } ${isClickable ? 'cursor-pointer' : 'cursor-not-allowed'}`}
+                        ? "bg-muted/50 hover:bg-muted"
+                        : "hover:bg-muted/30 opacity-50"
+                  } ${isClickable ? "cursor-pointer" : "cursor-not-allowed"}`}
                 >
                   <div
                     className={`step-indicator shrink-0 ${
                       isCompleted
-                        ? 'step-indicator-completed'
+                        ? "step-indicator-completed"
                         : isCurrent
-                        ? 'step-indicator-active'
-                        : 'step-indicator-pending'
+                          ? "step-indicator-active"
+                          : "step-indicator-pending"
                     }`}
                   >
                     {isCompleted ? (
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 13l4 4L19 7"
+                        />
                       </svg>
                     ) : (
                       stepIcons[step.icon]
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className={`text-sm font-medium ${isCurrent ? 'text-primary' : 'text-foreground'}`}>
+                    <p
+                      className={`text-sm font-medium ${isCurrent ? "text-primary" : "text-foreground"}`}
+                    >
                       {step.name}
                     </p>
                     <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
@@ -172,12 +203,16 @@ export default function Home() {
           <div className="mt-4 pt-4 border-t">
             <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
               <span>完成进度</span>
-              <span>{completedSteps.length}/{simulationSteps.length}</span>
+              <span>
+                {completedSteps.length}/{simulationSteps.length}
+              </span>
             </div>
             <div className="h-2 bg-muted rounded-full overflow-hidden">
               <div
                 className="h-full bg-primary transition-all duration-300"
-                style={{ width: `${(completedSteps.length / simulationSteps.length) * 100}%` }}
+                style={{
+                  width: `${(completedSteps.length / simulationSteps.length) * 100}%`,
+                }}
               />
             </div>
           </div>

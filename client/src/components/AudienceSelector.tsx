@@ -3,20 +3,19 @@
  * 步骤2：从CDP选择或创建目标人群
  */
 
-import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState, useMemo, useCallback } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
-import { 
-  Users, 
-  Filter, 
-  Database,
-  Tag,
-  Plus,
-  X
-} from "lucide-react";
+import { Users, Filter, Database, Tag, X } from "lucide-react";
 
 interface Props {
   onComplete: () => void;
@@ -25,67 +24,73 @@ interface Props {
 // CDP 标签数据
 const cdpTags = {
   feedingPhilosophy: [
-    { id: 'scientific', label: '科学养宠', count: 3200 },
-    { id: 'premium', label: '精细养', count: 1800 },
-    { id: 'follower', label: '跟风养', count: 2500 },
-    { id: 'budget', label: '穷养', count: 2500 }
+    { id: "scientific", label: "科学养宠", count: 3200 },
+    { id: "premium", label: "精细养", count: 1800 },
+    { id: "follower", label: "跟风养", count: 2500 },
+    { id: "budget", label: "穷养", count: 2500 },
   ],
   petType: [
-    { id: 'cat', label: '猫', count: 5500 },
-    { id: 'dog', label: '狗', count: 4500 }
+    { id: "cat", label: "猫", count: 5500 },
+    { id: "dog", label: "狗", count: 4500 },
   ],
   healthConcern: [
-    { id: 'sensitive_stomach', label: '肠胃敏感', count: 2800 },
-    { id: 'obesity', label: '肥胖/减重', count: 1500 },
-    { id: 'joint', label: '关节问题', count: 1200 },
-    { id: 'skin', label: '皮肤敏感', count: 900 },
-    { id: 'urinary', label: '泌尿问题', count: 600 }
+    { id: "sensitive_stomach", label: "肠胃敏感", count: 2800 },
+    { id: "obesity", label: "肥胖/减重", count: 1500 },
+    { id: "joint", label: "关节问题", count: 1200 },
+    { id: "skin", label: "皮肤敏感", count: 900 },
+    { id: "urinary", label: "泌尿问题", count: 600 },
   ],
   priceRange: [
-    { id: 'low', label: '100元以下/月', count: 2500 },
-    { id: 'mid', label: '100-300元/月', count: 4500 },
-    { id: 'high', label: '300-500元/月', count: 2200 },
-    { id: 'premium', label: '500元以上/月', count: 800 }
+    { id: "low", label: "100元以下/月", count: 2500 },
+    { id: "mid", label: "100-300元/月", count: 4500 },
+    { id: "high", label: "300-500元/月", count: 2200 },
+    { id: "premium", label: "500元以上/月", count: 800 },
   ],
   ageGroup: [
-    { id: 'young', label: '18-25岁', count: 2000 },
-    { id: 'adult', label: '26-35岁', count: 4500 },
-    { id: 'middle', label: '36-50岁', count: 2500 },
-    { id: 'senior', label: '50岁以上', count: 1000 }
-  ]
+    { id: "young", label: "18-25岁", count: 2000 },
+    { id: "adult", label: "26-35岁", count: 4500 },
+    { id: "middle", label: "36-50岁", count: 2500 },
+    { id: "senior", label: "50岁以上", count: 1000 },
+  ],
 };
 
 export default function AudienceSelector({ onComplete }: Props) {
   const [selectedTags, setSelectedTags] = useState<string[]>([
-    'scientific', 'cat', 'sensitive_stomach'
+    "scientific",
+    "cat",
+    "sensitive_stomach",
   ]);
   const [sampleSize, setSampleSize] = useState([5000]);
 
-  const toggleTag = (tagId: string) => {
-    setSelectedTags(prev => 
-      prev.includes(tagId) 
-        ? prev.filter(t => t !== tagId)
-        : [...prev, tagId]
+  const toggleTag = useCallback((tagId: string) => {
+    setSelectedTags(prev =>
+      prev.includes(tagId) ? prev.filter(t => t !== tagId) : [...prev, tagId]
     );
-  };
+  }, []);
 
-  const removeTag = (tagId: string) => {
+  const removeTag = useCallback((tagId: string) => {
     setSelectedTags(prev => prev.filter(t => t !== tagId));
-  };
+  }, []);
 
   // 计算预估人群数量
-  const estimatedCount = Math.min(
-    selectedTags.length > 0 ? Math.floor(10000 / (selectedTags.length * 0.8)) : 10000,
-    10000
+  const estimatedCount = useMemo(
+    () =>
+      Math.min(
+        selectedTags.length > 0
+          ? Math.floor(10000 / (selectedTags.length * 0.8))
+          : 10000,
+        10000
+      ),
+    [selectedTags.length]
   );
 
-  const getTagLabel = (tagId: string) => {
+  const getTagLabel = useCallback((tagId: string) => {
     for (const category of Object.values(cdpTags)) {
       const tag = category.find(t => t.id === tagId);
       if (tag) return tag.label;
     }
     return tagId;
-  };
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -112,8 +117,8 @@ export default function AudienceSelector({ onComplete }: Props) {
               <CardContent>
                 <div className="flex flex-wrap gap-2">
                   {selectedTags.map(tagId => (
-                    <Badge 
-                      key={tagId} 
+                    <Badge
+                      key={tagId}
                       variant="default"
                       className="pl-3 pr-1 py-1 flex items-center gap-1"
                     >
@@ -138,14 +143,14 @@ export default function AudienceSelector({ onComplete }: Props) {
                 <Database className="w-4 h-4 text-primary" />
                 CDP 人群标签库
               </CardTitle>
-              <CardDescription>
-                拖拽或点击标签添加到测试人群
-              </CardDescription>
+              <CardDescription>拖拽或点击标签添加到测试人群</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Feeding Philosophy */}
               <div>
-                <h4 className="text-sm font-medium text-foreground mb-3">养宠理念</h4>
+                <h4 className="text-sm font-medium text-foreground mb-3">
+                  养宠理念
+                </h4>
                 <div className="flex flex-wrap gap-2">
                   {cdpTags.feedingPhilosophy.map(tag => (
                     <button
@@ -153,8 +158,8 @@ export default function AudienceSelector({ onComplete }: Props) {
                       onClick={() => toggleTag(tag.id)}
                       className={`px-3 py-1.5 rounded-full text-sm border transition-all ${
                         selectedTags.includes(tag.id)
-                          ? 'bg-primary text-primary-foreground border-primary'
-                          : 'bg-background hover:bg-muted border-border'
+                          ? "bg-primary text-primary-foreground border-primary"
+                          : "bg-background hover:bg-muted border-border"
                       }`}
                     >
                       {tag.label}
@@ -168,7 +173,9 @@ export default function AudienceSelector({ onComplete }: Props) {
 
               {/* Pet Type */}
               <div>
-                <h4 className="text-sm font-medium text-foreground mb-3">宠物类型</h4>
+                <h4 className="text-sm font-medium text-foreground mb-3">
+                  宠物类型
+                </h4>
                 <div className="flex flex-wrap gap-2">
                   {cdpTags.petType.map(tag => (
                     <button
@@ -176,11 +183,11 @@ export default function AudienceSelector({ onComplete }: Props) {
                       onClick={() => toggleTag(tag.id)}
                       className={`px-3 py-1.5 rounded-full text-sm border transition-all ${
                         selectedTags.includes(tag.id)
-                          ? 'bg-primary text-primary-foreground border-primary'
-                          : 'bg-background hover:bg-muted border-border'
+                          ? "bg-primary text-primary-foreground border-primary"
+                          : "bg-background hover:bg-muted border-border"
                       }`}
                     >
-                      {tag.id === 'cat' ? '🐱' : '🐕'} {tag.label}
+                      {tag.id === "cat" ? "🐱" : "🐕"} {tag.label}
                       <span className="ml-1.5 text-xs opacity-70">
                         {(tag.count / 1000).toFixed(1)}k
                       </span>
@@ -191,7 +198,9 @@ export default function AudienceSelector({ onComplete }: Props) {
 
               {/* Health Concerns */}
               <div>
-                <h4 className="text-sm font-medium text-foreground mb-3">健康关注</h4>
+                <h4 className="text-sm font-medium text-foreground mb-3">
+                  健康关注
+                </h4>
                 <div className="flex flex-wrap gap-2">
                   {cdpTags.healthConcern.map(tag => (
                     <button
@@ -199,8 +208,8 @@ export default function AudienceSelector({ onComplete }: Props) {
                       onClick={() => toggleTag(tag.id)}
                       className={`px-3 py-1.5 rounded-full text-sm border transition-all ${
                         selectedTags.includes(tag.id)
-                          ? 'bg-primary text-primary-foreground border-primary'
-                          : 'bg-background hover:bg-muted border-border'
+                          ? "bg-primary text-primary-foreground border-primary"
+                          : "bg-background hover:bg-muted border-border"
                       }`}
                     >
                       {tag.label}
@@ -214,7 +223,9 @@ export default function AudienceSelector({ onComplete }: Props) {
 
               {/* Price Range */}
               <div>
-                <h4 className="text-sm font-medium text-foreground mb-3">消费能力</h4>
+                <h4 className="text-sm font-medium text-foreground mb-3">
+                  消费能力
+                </h4>
                 <div className="flex flex-wrap gap-2">
                   {cdpTags.priceRange.map(tag => (
                     <button
@@ -222,8 +233,8 @@ export default function AudienceSelector({ onComplete }: Props) {
                       onClick={() => toggleTag(tag.id)}
                       className={`px-3 py-1.5 rounded-full text-sm border transition-all ${
                         selectedTags.includes(tag.id)
-                          ? 'bg-primary text-primary-foreground border-primary'
-                          : 'bg-background hover:bg-muted border-border'
+                          ? "bg-primary text-primary-foreground border-primary"
+                          : "bg-background hover:bg-muted border-border"
                       }`}
                     >
                       {tag.label}
@@ -237,7 +248,9 @@ export default function AudienceSelector({ onComplete }: Props) {
 
               {/* Age Group */}
               <div>
-                <h4 className="text-sm font-medium text-foreground mb-3">年龄分布</h4>
+                <h4 className="text-sm font-medium text-foreground mb-3">
+                  年龄分布
+                </h4>
                 <div className="flex flex-wrap gap-2">
                   {cdpTags.ageGroup.map(tag => (
                     <button
@@ -245,8 +258,8 @@ export default function AudienceSelector({ onComplete }: Props) {
                       onClick={() => toggleTag(tag.id)}
                       className={`px-3 py-1.5 rounded-full text-sm border transition-all ${
                         selectedTags.includes(tag.id)
-                          ? 'bg-primary text-primary-foreground border-primary'
-                          : 'bg-background hover:bg-muted border-border'
+                          ? "bg-primary text-primary-foreground border-primary"
+                          : "bg-background hover:bg-muted border-border"
                       }`}
                     >
                       {tag.label}
@@ -282,8 +295,12 @@ export default function AudienceSelector({ onComplete }: Props) {
 
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-muted-foreground">模拟样本量</span>
-                  <span className="text-sm font-medium">{sampleSize[0].toLocaleString()}</span>
+                  <span className="text-sm text-muted-foreground">
+                    模拟样本量
+                  </span>
+                  <span className="text-sm font-medium">
+                    {sampleSize[0].toLocaleString()}
+                  </span>
                 </div>
                 <Slider
                   value={sampleSize}
@@ -306,7 +323,9 @@ export default function AudienceSelector({ onComplete }: Props) {
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">预计耗时</span>
-                  <span className="font-medium">~{Math.ceil(sampleSize[0] / 1000)} 分钟</span>
+                  <span className="font-medium">
+                    ~{Math.ceil(sampleSize[0] / 1000)} 分钟
+                  </span>
                 </div>
               </div>
             </CardContent>
@@ -343,8 +362,8 @@ export default function AudienceSelector({ onComplete }: Props) {
             </CardContent>
           </Card>
 
-          <Button 
-            className="w-full" 
+          <Button
+            className="w-full"
             size="lg"
             disabled={selectedTags.length === 0}
             onClick={onComplete}

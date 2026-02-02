@@ -1,0 +1,37 @@
+export const SIMULATION_CONFIG = {
+  PROGRESS: {
+    PERSONA_GENERATION: {
+      INCREMENT: 5,
+      INTERVAL_MS: 100,
+      MAX_PROGRESS: 100,
+    },
+    DUAL_SIMULATION: {
+      INCREMENT: 4,
+      INTERVAL_MS: 100,
+      MAX_PROGRESS: 100,
+    },
+    INTERACTION_ANALYSIS: {
+      INCREMENT: 5,
+      INTERVAL_MS: 80,
+      MAX_PROGRESS: 100,
+    },
+    BATCH_INTERVIEW: {
+      INCREMENT_MIN: 20,
+      INCREMENT_MAX: 70,
+      INTERVAL_MS: 100,
+      MAX_PROGRESS: 100,
+    },
+  },
+  BATCH_INTERVIEW: {
+    INCREMENT_MIN: 20,
+    INCREMENT_MAX: 70,
+    TOTAL_SAMPLES: 1000,
+    MAX_LOGS: 50,
+    STATS_UPDATE_INTERVAL: 100,
+    INTENT_DISTRIBUTION: {
+      HIGH: 0.28,
+      MEDIUM: 0.45,
+      LOW: 0.27,
+    },
+  },
+} as const;
