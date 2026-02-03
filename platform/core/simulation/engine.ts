@@ -34,12 +34,12 @@ export class RuleBasedEngine implements SimulationEngine {
     return this.rules.length > 0;
   }
 
-  simulate(context: SimulationContext): SimulationResult {
+  async simulate(context: SimulationContext): Promise<SimulationResult> {
     const startTime = Date.now();
     const steps: SimulationStep[] = [];
 
     // Evaluate rules
-    const evaluationResult = this.evaluateRules(context);
+    const evaluationResult = await this.evaluateRules(context);
 
     steps.push({
       name: 'rule-evaluation',
@@ -62,7 +62,7 @@ export class RuleBasedEngine implements SimulationEngine {
     };
   }
 
-  private evaluateRules(context: SimulationContext): RuleEvaluationResult {
+  private async evaluateRules(context: SimulationContext): Promise<RuleEvaluationResult> {
     const startTime = Date.now();
     const evaluationContext: RuleEvaluationContext = {
       variables: { ...context.metadata },
@@ -74,7 +74,7 @@ export class RuleBasedEngine implements SimulationEngine {
 
     // Find first matching rule
     for (const rule of sortedRules) {
-      if (this.evaluateCondition(rule.condition, evaluationContext)) {
+      if (await this.evaluateCondition(rule.condition, evaluationContext)) {
         const result = this.executeAction(rule.action, evaluationContext);
 
         return {
@@ -95,28 +95,23 @@ export class RuleBasedEngine implements SimulationEngine {
     };
   }
 
-  private evaluateCondition(condition: string, context: RuleEvaluationContext): boolean {
-    // Simple condition evaluation - in production, use a proper expression parser
-    // For now, support basic conditions like "age > 25" or "concerns.includes('健康')"
+  private async evaluateCondition(condition: string, context: RuleEvaluationContext): Promise<boolean> {
+    // Safe condition evaluation using expr-eval library
+    // Supports basic conditions like "age > 25" or "price < 500"
+    // This prevents code injection vulnerabilities
 
     try {
-      // Replace variables with values
-      let evaluated = condition;
-      for (const [key, value] of Object.entries(context.variables)) {
-        const regex = new RegExp(`\\b${key}\\b`, 'g');
-        if (typeof value === 'string') {
-          evaluated = evaluated.replace(regex, `'${value}'`);
-        } else if (typeof value === 'boolean') {
-          evaluated = evaluated.replace(regex, String(value));
-        } else if (typeof value === 'number') {
-          evaluated = evaluated.replace(regex, String(value));
-        }
-      }
+      // Dynamic import to avoid loading expr-eval if not used
+      const { Parser } = await import('expr-eval');
+      const parser = new Parser();
 
-      // Evaluate the condition (simplified - use proper parser in production)
-      // This is a very basic implementation for demonstration
-      return Function(`"use strict"; return (${evaluated})`)() as boolean;
-    } catch {
+      // Parse and evaluate the expression safely
+      const expression = parser.parse(condition);
+      const result = expression.evaluate(context.variables);
+
+      return Boolean(result);
+    } catch (error) {
+      console.warn(`Condition evaluation failed: ${condition}`, error);
       return false;
     }
   }
@@ -204,25 +199,86 @@ Respond in JSON format.`;
     return { system, user };
   }
 
-  private async callLLM(prompt: { system: string; user: string }): Promise<{
+  private async callLLM(
+    prompt: { system: string; user: string },
+    retries = 3,
+    timeout = 30000
+  ): Promise<{
     content: string;
     usage: { promptTokens: number; completionTokens: number; totalTokens: number };
   }> {
-    // Placeholder for actual LLM API call
+    // Placeholder for actual LLM API call with error handling
     // In production, implement actual OpenAI/Anthropic API call here
-    return {
-      content: JSON.stringify({
-        reaction: 'Simulated response',
-        decision: 'positive',
-        confidence: 0.8,
-        considerations: ['Quality', 'Price', 'Brand'],
-      }),
-      usage: {
-        promptTokens: 100,
-        completionTokens: 50,
-        totalTokens: 150,
-      },
-    };
+
+    for (let attempt = 0; attempt < retries; attempt++) {
+      try {
+        // Simulate API call with timeout
+        const response = await this.simulatedAPICall(prompt, timeout);
+
+        // Validate response
+        if (!response.content) {
+          throw new Error('Empty response content from LLM');
+        }
+
+        return response;
+      } catch (error) {
+        const isLastAttempt = attempt === retries - 1;
+
+        if (!isLastAttempt) {
+          // Exponential backoff: 2^attempt * 1000ms
+          const backoffDelay = Math.pow(2, attempt) * 1000;
+          console.warn(
+            `LLM call failed (attempt ${attempt + 1}/${retries}), ` +
+            `retrying in ${backoffDelay}ms...`,
+            error instanceof Error ? error.message : error
+          );
+          await new Promise(resolve => setTimeout(resolve, backoffDelay));
+        } else {
+          // All retries exhausted
+          console.error(`LLM call failed after ${retries} attempts:`, error);
+          throw new Error(
+            `LLM API call failed after ${retries} retries: ` +
+            `${error instanceof Error ? error.message : String(error)}`
+          );
+        }
+      }
+    }
+
+    // This should never be reached, but TypeScript needs it
+    throw new Error('LLM call failed unexpectedly');
+  }
+
+  private async simulatedAPICall(
+    prompt: { system: string; user: string },
+    timeout: number
+  ): Promise<{
+    content: string;
+    usage: { promptTokens: number; completionTokens: number; totalTokens: number };
+  }> {
+    // Simulate API call timeout
+    return new Promise((resolve, reject) => {
+      const timer = setTimeout(() => {
+        resolve({
+          content: JSON.stringify({
+            reaction: 'Simulated response',
+            decision: 'positive',
+            confidence: 0.8,
+            considerations: ['Quality', 'Price', 'Brand'],
+          }),
+          usage: {
+            promptTokens: 100,
+            completionTokens: 50,
+            totalTokens: 150,
+          },
+        });
+      }, 100); // Simulate network delay
+
+      // Timeout protection
+      setTimeout(() => {
+        clearTimeout(timer);
+        reject(new Error(`LLM API call timeout after ${timeout}ms`));
+      }, timeout);
+    });
   }
 
   private parseResponse(content: string): Record<string, unknown> {

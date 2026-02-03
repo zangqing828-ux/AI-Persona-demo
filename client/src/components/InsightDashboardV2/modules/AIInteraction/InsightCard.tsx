@@ -31,7 +31,6 @@ export interface InsightCardProps {
 }
 
 export function InsightCard({
-  id,
   title,
   insight,
   confidence,

@@ -7,7 +7,7 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ArrowDown, Database, FileText, MessageSquare, BarChart3, Lightbulb, ChevronRight } from 'lucide-react';
+import { ArrowDown, Database, MessageSquare, BarChart3, Lightbulb, ChevronRight } from 'lucide-react';
 
 export interface DataLineageNode {
   id: string;
@@ -79,7 +79,7 @@ export function DataLineageView({ lineage, onNodeClick }: DataLineageViewProps) 
     }
   };
 
-  const renderNode = (node: DataLineageNode, depth: number = 0): React.ReactElement => {
+  const renderNode = (node: DataLineageNode, depth: number = 0): React.JSX.Element => {
     const isExpanded = expandedNodes.has(node.id);
     const hasChildren = node.children && node.children.length > 0;
     const marginLeft = depth * 24;

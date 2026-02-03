@@ -4,12 +4,12 @@
  */
 
 import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TreePine, Users, Sparkles } from 'lucide-react';
 import { MetricHierarchy, MetricHierarchyProps } from './MetricHierarchy';
 import { SegmentComparison, SegmentComparisonProps } from './SegmentComparison';
-import { KeyInsightsGenerator, KeyInsightsGeneratorProps } from './KeyInsightsGenerator';
+import { KeyInsightsGenerator } from './KeyInsightsGenerator';
 
 export interface DeepAnalysisProps {
   onConclusionSelect?: (conclusionId: string) => void;
@@ -21,8 +21,6 @@ export interface DeepAnalysisProps {
 }
 
 export function DeepAnalysis({
-  onConclusionSelect,
-  selectedConclusion,
   metrics = [],
   segmentMetrics = [],
   segmentInsights = [],

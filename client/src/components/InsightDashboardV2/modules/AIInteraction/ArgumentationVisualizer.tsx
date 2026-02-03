@@ -7,8 +7,7 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Button } from '@/components/ui/button';
-import { Shield, CheckCircle2, AlertCircle, XCircle, TrendingUp } from 'lucide-react';
+import { Shield, CheckCircle2, AlertCircle, XCircle, TrendingUp, ExternalLink } from 'lucide-react';
 import { Argumentation } from '../DeepAnalysis/MetricHierarchy';
 
 export interface ArgumentationVisualizerProps {
@@ -279,9 +278,14 @@ export function ArgumentationVisualizer({
                             </div>
                           </div>
                           {evidence.sourceUrl && (
-                            <Button variant="link" size="sm" className="h-auto p-0 text-xs">
-                              查看原始数据 →
-                            </Button>
+                            <a
+                              href={evidence.sourceUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs text-primary hover:underline flex items-center gap-1"
+                            >
+                              查看原始数据 <ExternalLink className="w-3 h-3" />
+                            </a>
                           )}
                         </div>
                       )}

@@ -156,8 +156,8 @@ export class PersonaGenerator {
    * Generate a human-readable name from attributes
    */
   private generateName(attributes: Record<string, JsonValue>): string {
-    // Try to find common name attributes
-    const nameAttributes = ['name', 'firstName', 'firstName', '名', '姓名'];
+    // Try to find common name attributes (ordered by priority)
+    const nameAttributes = ['name', 'firstName', 'lastName', '名', '姓名'] as const;
 
     for (const attr of nameAttributes) {
       if (attr in attributes && typeof attributes[attr] === 'string') {
@@ -166,7 +166,8 @@ export class PersonaGenerator {
     }
 
     // Fallback to generated name
-    return `Persona_${Math.floor(Math.random() * 10000)}`;
+    const PERSONA_NAME_RANDOM_MAX = 10000;
+    return `Persona_${Math.floor(Math.random() * PERSONA_NAME_RANDOM_MAX)}`;
   }
 
   /**

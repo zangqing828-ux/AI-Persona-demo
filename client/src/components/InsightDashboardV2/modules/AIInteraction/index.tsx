@@ -3,9 +3,7 @@
  * Chat interface for AI-powered insights
  */
 
-import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { MessageSquare } from 'lucide-react';
+import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChatInterface, RAGQuery, RAGResult } from './ChatInterface';
 import { SelectionTracker } from './SelectionTracker';
 
@@ -18,7 +16,6 @@ export function AIInteraction({
   selectedText,
   queryInsights,
 }: AIInteractionProps) {
-  const [trackedSelections, setTrackedSelections] = useState<string[]>([]);
 
   const mockQueryInsights = async (query: RAGQuery): Promise<RAGResult> => {
     await new Promise(resolve => setTimeout(resolve, 800));
@@ -48,12 +45,7 @@ export function AIInteraction({
           <ChatInterface queryInsights={queryFunction} selectedText={selectedText} />
         </div>
         <div>
-          <SelectionTracker
-            onSelection={(selection) => {
-              console.log('Selection tracked:', selection);
-              setTrackedSelections(prev => [...prev, selection.text]);
-            }}
-          />
+          <SelectionTracker onSelection={() => {}} />
         </div>
       </div>
     </div>

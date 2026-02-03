@@ -4,7 +4,7 @@
  */
 
 import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { FileText, MessageSquare, Grid3x3 } from 'lucide-react';
 import { QuestionnaireResults, QuestionnaireResultsProps } from './QuestionnaireResults';
@@ -23,7 +23,6 @@ export function RawResults({
   questionnaireData,
   interviewData,
   crossAnalysisData,
-  onTextSelection,
 }: RawResultsProps) {
   const [activeTab, setActiveTab] = useState<'questionnaire' | 'interview' | 'cross'>('questionnaire');
 
@@ -56,18 +55,6 @@ export function RawResults({
     }));
 
     exportData(data, format, `interview-results-${format}`);
-  };
-
-  const handleCrossAnalysisExport = (format: 'csv' | 'json' | 'xlsx') => {
-    const data = crossAnalysisData.data.map(d => ({
-      维度1: d.dimension1,
-      维度2: d.dimension2,
-      指标: d.metric,
-      值: d.value,
-      样本数: d.count,
-    }));
-
-    exportData(data, format, `cross-analysis-${format}`);
   };
 
   return (

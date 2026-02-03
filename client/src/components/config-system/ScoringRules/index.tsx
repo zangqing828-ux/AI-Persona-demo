@@ -16,7 +16,7 @@ export interface ScoringRulesProps {
   industryId?: string;
 }
 
-export function ScoringRules({ industryId = 'pet-food' }: ScoringRulesProps) {
+export function ScoringRules({ }: ScoringRulesProps) {
   const { configs, saveScoringConfig, resetToDefaults } = useConfig();
   const [purchaseIntentHigh, setPurchaseIntentHigh] = useState(80);
   const [purchaseIntentMedium, setPurchaseIntentMedium] = useState(50);

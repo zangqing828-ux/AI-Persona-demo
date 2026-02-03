@@ -126,7 +126,7 @@ export class RAGEngine {
    * Generate AI answer from retrieved context
    */
   private async generateAnswer(
-    query: RAGQuery,
+    _query: RAGQuery,
     retrievedDocs: Array<{ document: VectorDocument; similarity: number }>
   ): Promise<string> {
     const sampleSize = this.extractSampleSize(retrievedDocs);
@@ -163,8 +163,8 @@ export class RAGEngine {
   }
 
   private generateRelatedQuestions(
-    query: RAGQuery,
-    docs: Array<{ document: VectorDocument; similarity: number }>
+    _query: RAGQuery,
+    _docs: Array<{ document: VectorDocument; similarity: number }>
   ): string[] {
     // Generate related questions based on query context
     return [

@@ -8,6 +8,14 @@ import type { IndustryConfig } from '../../../shared/types/industry.js';
 import type { JsonValue } from '../../../shared/types/platform.js';
 
 // =============================================================================
+// Type Definitions
+// =============================================================================
+
+interface OntologyRelationships {
+  [key: string]: string[];
+}
+
+// =============================================================================
 // Pet Food Schemas
 // =============================================================================
 
@@ -252,44 +260,175 @@ export const petFoodIndustryConfig: IndustryConfig = {
         name: '概念测试配置',
         component: 'ConceptTestConfig',
         description: '上传产品信息，配置测试参数',
+        modeConfig: {
+          requiredInBeginnerMode: true,
+          skippableInExpertMode: true,
+          defaultValue: {
+            productId: 'PROD001',
+            productName: '鲜萃高蛋白全价猫粮',
+            price: 268,
+            proteinContent: 42,
+          },
+        },
+        explainability: {
+          whyThisStep: '选择测试产品是模拟的起点，不同的产品属性会触发不同的用户反应',
+          impactOverview: '产品的价格、成分、品质直接影响购买意愿评分和信任度',
+          configImpacts: [
+            {
+              metricName: '购买意愿',
+              influenceWeight: 85,
+              description: '高蛋白含量会显著提升科学养宠用户的购买意愿',
+              affectedSteps: ['dual-sim', 'batch'],
+            },
+            {
+              metricName: '价格敏感度',
+              influenceWeight: 90,
+              description: '价格直接影响穷养用户的决策，对高净值用户影响较小',
+              affectedSteps: ['dual-sim', 'interaction'],
+            },
+          ],
+        },
       },
       {
         id: 'audience',
         name: '虚拟客群选择',
         component: 'AudienceSelector',
         description: '从CDP选择或创建目标人群',
+        modeConfig: {
+          requiredInBeginnerMode: true,
+          skippableInExpertMode: true,
+          defaultValue: {
+            segmentId: 'all-owners',
+            segmentName: '所有宠物主',
+            sampleSize: 100,
+          },
+        },
+        explainability: {
+          whyThisStep: '目标人群决定了模拟结果的代表性，不同人群的反应差异显著',
+          impactOverview: '养宠理念、收入水平、健康关注等因素直接影响购买决策路径',
+          configImpacts: [
+            {
+              metricName: '转化率预测',
+              influenceWeight: 75,
+              description: '科学养宠人群转化率通常高于其他人群',
+              affectedSteps: ['batch', 'insight'],
+            },
+          ],
+        },
       },
       {
         id: 'persona',
         name: '人宠画像生成',
         component: 'DualPersonaGenerator',
         description: 'Dual-Persona Agent 构建人宠组合',
+        modeConfig: {
+          requiredInBeginnerMode: true,
+          skippableInExpertMode: true,
+          defaultValue: {
+            useDefaultPersonas: true,
+            personaCount: 5,
+          },
+        },
+        explainability: {
+          whyThisStep: '人宠双视角是该平台的核心创新，主人的理性决策与宠物的生理反应同等重要',
+          impactOverview: '主人关注价格和成分，宠物关注适口性和消化反应，两者共同决定长期留存',
+          configImpacts: [
+            {
+              metricName: '复购率预测',
+              influenceWeight: 80,
+              description: '宠物消化反应是长期复购的关键因素',
+              affectedSteps: ['dual-sim', 'interaction'],
+            },
+          ],
+        },
       },
       {
         id: 'dual-sim',
         name: '双视角模拟',
         component: 'DualSimulation',
         description: 'Owner Agent + Pet Agent 并行模拟',
+        modeConfig: {
+          requiredInBeginnerMode: true,
+          skippableInExpertMode: true,
+          defaultValue: {
+            useDefaultSimulation: true,
+          },
+        },
+        explainability: {
+          whyThisStep: '并行模拟主人和宠物的反应，发现人与宠之间的决策冲突点',
+          impactOverview: '主人愿意买 vs 宠物愿意吃，这种矛盾是流失的主要原因',
+          configImpacts: [
+            {
+              metricName: '流失风险',
+              influenceWeight: 85,
+              description: '适口性差或消化不良是导致换粮的主要原因',
+              affectedSteps: ['interaction', 'batch'],
+            },
+          ],
+        },
       },
       {
         id: 'interaction',
         name: '交互分析',
         component: 'InteractionAnalysis',
         description: 'Interaction Analyst Agent 预期确认',
+        modeConfig: {
+          requiredInBeginnerMode: true,
+          skippableInExpertMode: true,
+          defaultValue: {
+            useDefaultAnalysis: true,
+          },
+        },
+        explainability: {
+          whyThisStep: '分析人与宠的交互场景，预测真实使用中的体验问题',
+          impactOverview: '喂食场景中的情绪反应和行为模式影响口碑传播',
+          configImpacts: [
+            {
+              metricName: 'NPS预测',
+              influenceWeight: 70,
+              description: '愉悦的喂食体验促进推荐意愿',
+              affectedSteps: ['insight'],
+            },
+          ],
+        },
       },
       {
         id: 'batch',
         name: '批量化访谈',
         component: 'BatchInterview',
         description: '10,000+ 虚拟消费者批量测试',
+        modeConfig: {
+          requiredInBeginnerMode: true,
+          skippableInExpertMode: false, // CRITICAL: Cannot skip the core value step
+        },
+        explainability: {
+          whyThisStep: '批量访谈是平台的核心价值，通过大样本量验证假设的统计显著性',
+          impactOverview: '获得量化的购买意愿分布、价格敏感度曲线、细分人群对比',
+          configImpacts: [
+            {
+              metricName: '统计显著性',
+              influenceWeight: 95,
+              description: '大样本量确保结果可靠，支持细分人群分析',
+              affectedSteps: ['insight'],
+            },
+          ],
+        },
       },
       {
         id: 'insight',
         name: '洞察仪表盘',
         component: 'InsightDashboard',
         description: '量化看板 + 质化反馈 + 场景回放',
+        // No modeConfig - this is an output step, not skippable
+        explainability: {
+          whyThisStep: '将模拟结果可视化为可执行的洞察和建议',
+          impactOverview: '提供数据支持，辅助产品迭代和市场决策',
+          configImpacts: [],
+        },
       },
     ],
+    defaultMode: 'beginner',
+    allowModeSwitch: true,
   },
 
   // Agents: Owner Agent and Pet Agent
@@ -435,11 +574,11 @@ export const petFoodIndustryConfig: IndustryConfig = {
         '重量',
       ],
       relationships: {
-        '高蛋白': ['肌肉发育', '活力充沛'] as any,
-        '无谷': ['低敏', '易消化'] as any,
-        '添加益生菌': ['肠道健康', '便便改善'] as any,
-        '添加氨糖软骨素': ['关节养护', '老年犬适用'] as any,
-      },
+        '高蛋白': ['肌肉发育', '活力充沛'],
+        '无谷': ['低敏', '易消化'],
+        '添加益生菌': ['肠道健康', '便便改善'],
+        '添加氨糖软骨素': ['关节养护', '老年犬适用'],
+      } satisfies OntologyRelationships,
     },
     rules: [
       '猫咪是肉食动物，需要高蛋白饮食',

@@ -99,11 +99,11 @@ export class ScenarioAnalyzer {
     };
   }
 
-  private evaluateTrigger(
+  private async evaluateTrigger(
     trigger: { condition: string; threshold?: number; attributes?: Record<string, unknown> },
     simulationResult: Record<string, unknown>,
     context?: Record<string, unknown>
-  ): boolean {
+  ): Promise<boolean> {
     // Check if attributes match
     if (trigger.attributes) {
       for (const [key, value] of Object.entries(trigger.attributes)) {
@@ -113,10 +113,10 @@ export class ScenarioAnalyzer {
       }
     }
 
-    // Check condition (simplified - use proper expression parser in production)
+    // Check condition using safe expression parser
     if (trigger.condition) {
       try {
-        const result = this.evaluateCondition(trigger.condition, {
+        const result = await this.evaluateCondition(trigger.condition, {
           ...simulationResult,
           ...context,
         });
@@ -137,26 +137,19 @@ export class ScenarioAnalyzer {
     return false;
   }
 
-  private evaluateCondition(condition: string, context: Record<string, unknown>): boolean {
-    // Very basic condition evaluation - use proper parser in production
+  private async evaluateCondition(condition: string, context: Record<string, unknown>): Promise<boolean> {
+    // Safe condition evaluation using expr-eval library
+    // This prevents code injection vulnerabilities
     try {
-      const variables = Object.keys(context);
-      let evaluated = condition;
+      const { Parser } = await import('expr-eval');
+      const parser = new Parser();
 
-      for (const key of variables) {
-        const value = context[key];
-        const regex = new RegExp(`\\b${key}\\b`, 'g');
-        if (typeof value === 'string') {
-          evaluated = evaluated.replace(regex, `'${value}'`);
-        } else if (typeof value === 'boolean') {
-          evaluated = evaluated.replace(regex, String(value));
-        } else if (typeof value === 'number') {
-          evaluated = evaluated.replace(regex, String(value));
-        }
-      }
+      const expression = parser.parse(condition);
+      const result = expression.evaluate(context);
 
-      return Function(`"use strict"; return (${evaluated})`)() as boolean;
-    } catch {
+      return Boolean(result);
+    } catch (error) {
+      console.warn(`Condition evaluation failed: ${condition}`, error);
       return false;
     }
   }

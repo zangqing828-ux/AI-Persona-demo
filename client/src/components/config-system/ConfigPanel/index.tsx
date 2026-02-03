@@ -4,7 +4,6 @@
  */
 
 import { useState } from 'react';
-import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
@@ -34,8 +33,6 @@ export interface ConfigPanelProps {
 
 export default function ConfigPanel({
   tabs = defaultTabs,
-  projectId = 'default',
-  industryId = 'pet-food',
 }: ConfigPanelProps) {
   const [activeTab, setActiveTab] = useState('basic');
   const { configs, loading, error } = useConfig();

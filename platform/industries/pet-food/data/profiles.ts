@@ -7,7 +7,7 @@ import type {
   DualPersona,
   OwnerProfile,
   PetProfile,
-} from '../../../../client/src/data/petFoodSimulation.js';
+} from '../../../../shared/types/pet-food.js';
 
 /** 宠物主人样本数据 */
 export const ownerProfiles: OwnerProfile[] = [
@@ -163,6 +163,7 @@ export const dualPersonas: DualPersona[] = [
     id: 'DP001',
     owner: ownerProfiles[0],
     pet: petProfiles[0],
+    matchScore: 85,
     relationship: '焦虑的新手猫妈妈 + 体弱多病的布偶',
     feedingScenario: '每天定时定量喂食，会仔细观察便便状态',
     emotionalBond: '把猫当孩子养，愿意为健康付出高溢价',
@@ -171,6 +172,7 @@ export const dualPersonas: DualPersona[] = [
     id: 'DP002',
     owner: ownerProfiles[1],
     pet: petProfiles[1],
+    matchScore: 90,
     relationship: '理性的精英狗爸 + 活力满满的大金毛',
     feedingScenario: '注重科学配比，会研究配料表',
     emotionalBond: '视狗为家人，追求最优解',
@@ -179,6 +181,7 @@ export const dualPersonas: DualPersona[] = [
     id: 'DP003',
     owner: ownerProfiles[2],
     pet: petProfiles[2],
+    matchScore: 65,
     relationship: '预算有限的学生党 + 皮实的田园猫',
     feedingScenario: '能吃饱就行，偶尔加餐罐头',
     emotionalBond: '喜欢但经济能力有限',
@@ -187,6 +190,7 @@ export const dualPersonas: DualPersona[] = [
     id: 'DP004',
     owner: ownerProfiles[3],
     pet: petProfiles[3],
+    matchScore: 95,
     relationship: '传统的退休阿姨 + 陪伴多年的老泰迪',
     feedingScenario: '听宠物店推荐，偶尔喂人食',
     emotionalBond: '相依为命的老伙伴',
@@ -195,6 +199,7 @@ export const dualPersonas: DualPersona[] = [
     id: 'DP005',
     owner: ownerProfiles[4],
     pet: petProfiles[4],
+    matchScore: 88,
     relationship: '成分党理工男 + 需要减肥的英短',
     feedingScenario: '严格控制热量，定期称重',
     emotionalBond: '用数据说话的科学喂养',

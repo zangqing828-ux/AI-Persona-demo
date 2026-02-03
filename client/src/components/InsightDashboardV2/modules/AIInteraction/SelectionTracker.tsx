@@ -54,7 +54,7 @@ export function SelectionTracker({
         const newSelection: TextSelection = {
           id: `sel_${Date.now()}`,
           text: selectedText,
-          context: getContext(selectedText),
+          context: getContext(),
           timestamp: new Date(),
         };
 
@@ -84,7 +84,7 @@ export function SelectionTracker({
   }, []);
 
   // Get surrounding context for selected text
-  const getContext = (text: string): string => {
+  const getContext = (): string => {
     const selection = window.getSelection();
     if (!selection || selection.rangeCount === 0) return '';
 

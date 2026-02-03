@@ -158,11 +158,12 @@ function vitePluginManusDebugCollector(): Plugin {
 
 const plugins = [
   react(),
-  tailwindcss(),
+  // Only include tailwindcss plugin when not in test mode
+  process.env.NODE_ENV !== "test" ? tailwindcss() : null,
   jsxLocPlugin(),
   vitePluginManusRuntime(),
   vitePluginManusDebugCollector(),
-];
+].filter(Boolean);
 
 export default defineConfig({
   plugins,
@@ -197,5 +198,12 @@ export default defineConfig({
       strict: true,
       deny: ["**/.*"],
     },
+  },
+  test: {
+    globals: true,
+    environment: "happy-dom",
+    setupFiles: [],
+    include: ["**/__tests__/**/*.test.{ts,tsx}"],
+    css: false,
   },
 });

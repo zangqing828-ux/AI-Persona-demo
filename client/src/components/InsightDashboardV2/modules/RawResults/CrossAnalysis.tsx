@@ -5,12 +5,11 @@
 
 import { useState, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Grid3x3, TrendingUp, PieChart as PieChartIcon, BarChart3 } from 'lucide-react';
+import { Grid3x3, TrendingUp, BarChart3 } from 'lucide-react';
 
 export interface AnalysisDataPoint {
   id: string;

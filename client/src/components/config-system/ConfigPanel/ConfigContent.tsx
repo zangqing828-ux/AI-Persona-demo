@@ -17,7 +17,7 @@ export interface ConfigContentProps {
   configs: Record<string, unknown>;
 }
 
-export function ConfigContent({ activeTab, configs }: ConfigContentProps) {
+export function ConfigContent({ activeTab }: ConfigContentProps) {
   const { industryId } = useIndustryConfig();
 
   const renderContent = () => {

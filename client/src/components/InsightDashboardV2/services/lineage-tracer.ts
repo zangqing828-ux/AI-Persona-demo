@@ -114,7 +114,7 @@ export class LineageTracer {
     }));
   }
 
-  private calculatePath(fromNode: any, toNode: any): Array<{
+  private calculatePath(fromNode: any, _toNode: any): Array<{
     nodeId: string;
     nodeName: string;
     transformation?: string;

@@ -3,7 +3,7 @@
  * Test products for simulation
  */
 
-import type { Product } from '../../../../client/src/data/petFoodSimulation.js';
+import type { Product } from '../../../../shared/types/pet-food.js';
 
 /** 待测产品 */
 export const testProducts: Product[] = [

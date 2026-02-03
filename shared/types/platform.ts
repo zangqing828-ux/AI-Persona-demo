@@ -264,16 +264,69 @@ export interface BatchInterviewResult {
 // Workflow Types
 // =============================================================================
 
+/**
+ * Mode-specific configuration for workflow steps
+ * Controls how a step behaves in different user modes
+ */
+export interface ModeConfig {
+  /** Whether this step is required in beginner mode (defaults to true) */
+  requiredInBeginnerMode?: boolean;
+  /** Whether this step can be skipped in expert mode (defaults to false) */
+  skippableInExpertMode?: boolean;
+  /** Default value to use when step is skipped in expert mode */
+  defaultValue?: unknown;
+}
+
+/**
+ * Describes how a configuration affects the simulation outcome
+ * Used for explainability features
+ */
+export interface ConfigImpact {
+  /** Name of the metric being affected (e.g., "purchase likelihood", "engagement score") */
+  metricName: string;
+  /** Weight of influence (0-100, higher = greater impact) */
+  influenceWeight: number;
+  /** Human-readable description of the impact */
+  description: string;
+  /** List of step IDs that are affected by this configuration */
+  affectedSteps: string[];
+}
+
+/**
+ * Explainability metadata for workflow steps
+ * Helps users understand why a step exists and how it affects the simulation
+ */
+export interface ExplainabilityMetadata {
+  /** Explanation of why this step exists in the workflow */
+  whyThisStep: string;
+  /** High-level overview of how this step impacts simulation results */
+  impactOverview: string;
+  /** Detailed breakdown of configuration impacts */
+  configImpacts: ConfigImpact[];
+}
+
 export interface WorkflowStep {
   id: string;
   name: string;
   component: string;
   description?: string;
   required?: boolean;
+
+  // NEW: Mode-specific configuration
+  /** Controls step behavior in beginner vs expert mode */
+  modeConfig?: ModeConfig;
+
+  // NEW: Explainability metadata (for Phase 2)
+  /** Provides explanations about the step's purpose and impact */
+  explainability?: ExplainabilityMetadata;
 }
 
 export interface WorkflowConfig {
   steps: WorkflowStep[];
+  /** Optional default mode for the workflow ('beginner' | 'expert') */
+  defaultMode?: 'beginner' | 'expert';
+  /** Whether mode switching is allowed for this workflow */
+  allowModeSwitch?: boolean;
 }
 
 // =============================================================================

@@ -22,12 +22,29 @@ import type {
 
 /**
  * Check if a profile matches a tag condition
+ * @throws {Error} If condition is invalid (missing required fields)
  */
 export function matchesCondition(
   profile: AudienceProfile,
   condition: TagCondition
 ): boolean {
+  // Input validation
+  if (!condition.attribute) {
+    throw new Error('TagCondition is missing required field: attribute');
+  }
+  if (!condition.operator) {
+    throw new Error('TagCondition is missing required field: operator');
+  }
+
   const value = profile.attributes[condition.attribute];
+
+  // Handle missing attribute values
+  if (value === undefined) {
+    return false;
+  }
+
+  // Type guards for number values
+  const isNumber = (v: unknown): v is number => typeof v === 'number' && !isNaN(v);
 
   switch (condition.operator) {
     case 'equals':
@@ -55,22 +72,22 @@ export function matchesCondition(
       return true;
 
     case 'greater-than':
-      if (typeof value === 'number' && typeof condition.value === 'number') {
+      if (isNumber(value) && isNumber(condition.value)) {
         return value > condition.value;
       }
       return false;
 
     case 'less-than':
-      if (typeof value === 'number' && typeof condition.value === 'number') {
+      if (isNumber(value) && isNumber(condition.value)) {
         return value < condition.value;
       }
       return false;
 
     case 'between':
       if (
-        typeof value === 'number' &&
-        condition.min !== undefined &&
-        condition.max !== undefined
+        isNumber(value) &&
+        isNumber(condition.min) &&
+        isNumber(condition.max)
       ) {
         return value >= condition.min && value <= condition.max;
       }

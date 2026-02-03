@@ -15,7 +15,6 @@ import { RawResults } from './modules/RawResults';
 import { DeepAnalysis } from './modules/DeepAnalysis';
 import { AIInteraction } from './modules/AIInteraction';
 import {
-  personas as mockPersonas,
   surveyData as mockSurveyData,
   interviewData as mockInterviewData,
   metricsTree as mockMetricTree,
@@ -104,7 +103,13 @@ export default function InsightDashboardV2() {
     },
   };
 
-  const segmentMetrics = mockPersonaSegments.map((seg) => ({
+  const segmentMetrics: Array<{
+    segmentId: string;
+    segmentName: string;
+    metricName: string;
+    value: number;
+    sampleSize: number;
+  }> = mockPersonaSegments.map((seg) => ({
     segmentId: seg.type,
     segmentName: seg.type,
     metricName: '平均得分',

@@ -40,15 +40,17 @@ export interface KeyInsightsGeneratorProps {
 
 export function KeyInsightsGenerator({ metrics, onInsightSelect }: KeyInsightsGeneratorProps) {
   const [activeTab, setActiveTab] = useState<'all' | 'opportunities' | 'risks' | 'strengths' | 'trends'>('all');
-  const [selectedInsight, setSelectedInsight] = useState<GeneratedInsight | null>(null);
 
   // Generate insights from metrics
   const generatedInsights = useMemo(() => {
     const insights: GeneratedInsight[] = [];
 
     metrics.forEach(metric => {
+      // Store trend in a local variable to avoid type narrowing issues
+      const trend = metric.trend;
+
       // Analyze metric value and trend
-      if (metric.value >= 80 && metric.trend === 'up') {
+      if (metric.value >= 80 && trend === 'up') {
         insights.push({
           id: `insight-${metric.id}-strength`,
           type: 'strength',
@@ -56,7 +58,7 @@ export function KeyInsightsGenerator({ metrics, onInsightSelect }: KeyInsightsGe
           description: `${metric.name}达到${metric.value}${metric.unit || ''}，且呈上升趋势，这表明我们在该领域表现出色。`,
           evidence: [
             `当前值: ${metric.value}${metric.unit || ''}`,
-            `趋势: ${getTrendLabel(metric.trend)}`,
+            `趋势: ${getTrendLabel(trend)}`,
             `置信度: ${metric.argumentation.confidence}%`,
             `数据点: ${metric.dataPoints.length} 个`,
           ],
@@ -71,7 +73,7 @@ export function KeyInsightsGenerator({ metrics, onInsightSelect }: KeyInsightsGe
         });
       }
 
-      if (metric.value <= 40 && metric.trend === 'down') {
+      if (metric.value <= 40 && trend === 'down') {
         insights.push({
           id: `insight-${metric.id}-risk`,
           type: 'risk',
@@ -79,7 +81,7 @@ export function KeyInsightsGenerator({ metrics, onInsightSelect }: KeyInsightsGe
           description: `${metric.name}仅为${metric.value}${metric.unit || ''}，且呈下降趋势，需要立即采取措施改善。`,
           evidence: [
             `当前值: ${metric.value}${metric.unit || ''}`,
-            `趋势: ${getTrendLabel(metric.trend)}`,
+            `趋势: ${getTrendLabel(trend)}`,
             `置信度: ${metric.argumentation.confidence}%`,
             `数据点: ${metric.dataPoints.length} 个`,
           ],
@@ -95,7 +97,7 @@ export function KeyInsightsGenerator({ metrics, onInsightSelect }: KeyInsightsGe
         });
       }
 
-      if (metric.value >= 60 && metric.value <= 80 && metric.trend === 'up') {
+      if (metric.value >= 60 && metric.value <= 80 && trend === 'up') {
         insights.push({
           id: `insight-${metric.id}-opportunity`,
           type: 'opportunity',
@@ -103,7 +105,7 @@ export function KeyInsightsGenerator({ metrics, onInsightSelect }: KeyInsightsGe
           description: `${metric.name}为${metric.value}${metric.unit || ''}，呈上升趋势，通过优化有可能达到更高水平。`,
           evidence: [
             `当前值: ${metric.value}${metric.unit || ''}`,
-            `趋势: ${metric.trend === 'up' ? '上升' : metric.trend === 'down' ? '下降' : '稳定'}`,
+            `趋势: ${trend === 'up' ? '上升' : trend === 'down' ? '下降' : '稳定'}`,
             `潜力空间: ${100 - metric.value}${metric.unit || ''}`,
             `置信度: ${metric.argumentation.confidence}%`,
           ],
@@ -118,22 +120,22 @@ export function KeyInsightsGenerator({ metrics, onInsightSelect }: KeyInsightsGe
         });
       }
 
-      if (metric.trend === 'up' || metric.trend === 'down') {
+      if (trend === 'up' || trend === 'down') {
         insights.push({
           id: `insight-${metric.id}-trend`,
           type: 'trend',
-          title: `${metric.name}呈现${metric.trend === 'up' ? '上升' : '下降'}趋势`,
-          description: `数据显示${metric.name}在过去一段时间内持续${metric.trend === 'up' ? '上升' : '下降'}，值得关注。`,
+          title: `${metric.name}呈现${trend === 'up' ? '上升' : '下降'}趋势`,
+          description: `数据显示${metric.name}在过去一段时间内持续${trend === 'up' ? '上升' : '下降'}，值得关注。`,
           evidence: [
-            `趋势方向: ${metric.trend === 'up' ? '上升' : '下降'}`,
+            `趋势方向: ${trend === 'up' ? '上升' : '下降'}`,
             `当前值: ${metric.value}${metric.unit || ''}`,
             `数据点: ${metric.dataPoints.length} 个`,
             `变化率: 基于时间序列分析`,
           ],
           confidence: metric.argumentation.confidence,
           impact: 'medium',
-          actionable: metric.trend === 'down',
-          recommendations: metric.trend === 'down' ? [
+          actionable: trend === 'down',
+          recommendations: trend === 'down' ? [
             '分析下降原因',
             '评估影响范围',
             '制定应对措施',
@@ -414,7 +416,6 @@ export function KeyInsightsGenerator({ metrics, onInsightSelect }: KeyInsightsGe
                   key={insight.id}
                   className={`border-2 ${getInsightColor(insight.type)} hover:shadow-md transition-shadow cursor-pointer`}
                   onClick={() => {
-                    setSelectedInsight(insight);
                     onInsightSelect?.(insight);
                   }}
                 >

@@ -102,16 +102,24 @@ export function useProgressSimulation(
     if (!isRunning) return;
 
     let timer: ReturnType<typeof setInterval> | null = null;
+    let isMounted = true;
 
     try {
       timer = setInterval(() => {
+        if (!isMounted) return;
+
         setProgressState((prev) => {
           const newProgress = Math.min(prev + increment, maxProgress);
 
           if (newProgress >= maxProgress) {
             if (timer) clearInterval(timer);
-            setIsRunning(false);
-            onCompleteRef.current?.();
+            // Defer state update to avoid affecting current render
+            setTimeout(() => {
+              if (isMounted) {
+                setIsRunning(false);
+                onCompleteRef.current?.();
+              }
+            }, 0);
             return maxProgress;
           }
 
@@ -119,10 +127,14 @@ export function useProgressSimulation(
         });
       }, intervalMs);
     } catch (error) {
-      setIsRunning(false);
+      console.error('Progress simulation error:', error);
+      setTimeout(() => {
+        if (isMounted) setIsRunning(false);
+      }, 0);
     }
 
     return () => {
+      isMounted = false;
       if (timer) clearInterval(timer);
     };
   }, [isRunning, increment, intervalMs, maxProgress]);
