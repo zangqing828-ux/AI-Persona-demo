@@ -4,7 +4,9 @@ import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { ConfigProvider } from "@/config-system/hooks/useConfig";
 import Home from "./pages/Home";
+import { useIndustryConfig } from "@/hooks/useIndustryConfig";
 
 function Router() {
   return (
@@ -29,12 +31,26 @@ function App() {
         defaultTheme="light"
         // switchable
       >
-        <TooltipProvider>
-          <Toaster />
-          <Router />
-        </TooltipProvider>
+        <ConfigProviderWrapper>
+          <TooltipProvider>
+            <Toaster />
+            <Router />
+          </TooltipProvider>
+        </ConfigProviderWrapper>
       </ThemeProvider>
     </ErrorBoundary>
+  );
+}
+
+// Wrapper component to provide config context
+function ConfigProviderWrapper({ children }: { children: React.ReactNode }) {
+  const { industryId } = useIndustryConfig();
+  const projectId = 'default-project'; // TODO: Get from route or user context
+
+  return (
+    <ConfigProvider projectId={projectId} industryId={industryId}>
+      {children}
+    </ConfigProvider>
   );
 }
 

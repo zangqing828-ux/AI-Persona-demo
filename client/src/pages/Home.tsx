@@ -27,10 +27,12 @@ import UserPersonaGenerator from "@/components/UserPersonaGenerator";
 import UserSimulation from "@/components/UserSimulation";
 import InteractionAnalysis from "@/components/InteractionAnalysis";
 import BatchInterview from "@/components/BatchInterview";
-import InsightDashboard from "@/components/InsightDashboard";
+import InsightDashboardV2 from "@/components/InsightDashboardV2";
 import { IndustrySelector } from "@/components/IndustrySelector";
 import { useIndustryData } from "@/hooks/useIndustryData";
 import { useIndustryConfig } from "@/hooks/useIndustryConfig";
+import ConfigPanel from "@/components/config-system/ConfigPanel";
+import { Button } from "@/components/ui/button";
 
 const stepIcons: Record<string, React.ReactNode> = {
   Settings: <Settings className="w-4 h-4" />,
@@ -45,6 +47,7 @@ const stepIcons: Record<string, React.ReactNode> = {
 export default function Home() {
   const [currentStep, setCurrentStep] = useState(1);
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
+  const [showConfig, setShowConfig] = useState(false);
   const [currentIndustry, setCurrentIndustry] = useState(() => {
     // Read from localStorage on mount
     return localStorage.getItem('current-industry') || 'pet-food';
@@ -87,7 +90,7 @@ export default function Home() {
           case 5:
             return <BatchInterview onComplete={handleStepComplete} />;
           case 6:
-            return <InsightDashboard />;
+            return <InsightDashboardV2 />;
           default:
             return null;
         }
@@ -107,7 +110,7 @@ export default function Home() {
           case 6:
             return <BatchInterview onComplete={handleStepComplete} />;
           case 7:
-            return <InsightDashboard />;
+            return <InsightDashboardV2 />;
           default:
             return null;
         }
@@ -124,8 +127,22 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      {/* Header */}
-      <header className="h-16 border-b bg-card flex items-center px-6 sticky top-0 z-50">
+      {showConfig ? (
+        <div className="h-screen flex flex-col">
+          <header className="h-16 border-b bg-card flex items-center px-6">
+            <Button
+              variant="ghost"
+              onClick={() => setShowConfig(false)}
+            >
+              ← 返回工作流
+            </Button>
+          </header>
+          <ConfigPanel />
+        </div>
+      ) : (
+        <>
+          {/* Header */}
+          <header className="h-16 border-b bg-card flex items-center px-6 sticky top-0 z-50">
         <div className="flex items-center gap-3">
           <img
             src="/images/marketingforce-logo.png"
@@ -143,6 +160,14 @@ export default function Home() {
           </div>
         </div>
         <div className="ml-auto flex items-center gap-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowConfig(!showConfig)}
+          >
+            <Settings className="w-4 h-4 mr-2" />
+            配置
+          </Button>
           <IndustrySelector
             currentIndustry={currentIndustry}
             onIndustryChange={(industryId) => {
@@ -260,6 +285,8 @@ export default function Home() {
           </div>
         </main>
       </div>
+    </>
+    )}
     </div>
   );
 }
